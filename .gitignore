@@ -220,4 +220,5 @@ pip-log.txt
 /segmentDoc
 stopdoc
 testDoc
+result
 *.jar
