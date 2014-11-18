@@ -6,7 +6,7 @@ import time
 
 DocPath = r"data\LdaOriginalDocs"
 Binpath = r"bin"
-nowtime = time.strftime('%H%M%S',time.localtime(time.time()))
+nowtime = time.strftime('%d%H%M%S',time.localtime(time.time()))
 ResultPath = "result\\" +  nowtime
 #书简介和微博的参数
 SUMMARY = 21
@@ -27,7 +27,7 @@ file_object = open(ParaPath)
 
 try:
 	all_the_text = file_object.read()
-	topic = int(all_the_text.split('\n')[2].split('\t')[1])
+	topic = int(all_the_text.split('\n')[3].split('\t')[1])
 finally:
      file_object.close()
 
