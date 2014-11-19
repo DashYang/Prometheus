@@ -9,11 +9,13 @@ class parafactory:
 	source_path = r"stopdoc"
 	target_path = r"data\LdaOriginalDocs"
 	docs = []
+	doc_labels = []
 	limit = 5
 
 	def read_doc_to_dic(self , name):
 		raw_dic = {};
-		file = open(name)
+		filepath = self.source_path + "\\" + name
+		file = open(filepath)
 		line = file.readline()
 		length = 0;
 		doc_line = ""
@@ -26,6 +28,7 @@ class parafactory:
 			doc_line += "\n"
 			line = file.readline()
 		self.docs.append(doc_line)
+		self.doc_labels.append(name)
 		dic = {'raw_dic':raw_dic , 'length':length}
 		return dic
 
@@ -35,9 +38,8 @@ class parafactory:
 		global_dic = {}
 
 		for fn in filenames:
-			filepath = self.source_path + "\\" + fn
-			dic = self.read_doc_to_dic(filepath)
-			print filepath + " done"
+			dic = self.read_doc_to_dic(fn)
+			print fn + " done"
 			for key in dic['raw_dic']:
 				global_dic[key] = global_dic.get(key , 0) + 1
 			dic_list.append(dic)
@@ -52,7 +54,7 @@ class parafactory:
 		global_dic = paralist['global_dic']
 		dic_list = paralist['dic_list']
 		folder_size = len(dic_list)
-		print 'folder_size%d' % folder_size
+		print 'folder_size:%d' % folder_size
 		for para in dic_list:
 			kvmap = [];
 			raw_dic = para['raw_dic']
@@ -60,12 +62,17 @@ class parafactory:
 			for key in raw_dic:
 				TF = 1.0 * raw_dic[key] / length #also p
 				IDF =  math.log(folder_size / global_dic[key])
-				print "%s %f %f" %(key , TF , IDF)
 				entropy = - TF * math.log(TF) / math.log(2) 
 				kvmap.append((key , TF * IDF * entropy))
 			doc_paralist.append(kvmap)
 		return doc_paralist
 	
+	def write_file(self , target , file):
+		output = open(target, 'w')
+		output.write(file)
+		output.close()
+
+
 	#clear low value word
 	def clear_folder(self ):
 		list = self.calculate_entropy_and_tf_idf()
@@ -75,22 +82,20 @@ class parafactory:
 			newdoc = ""
 			sortkvmap = sorted(kvmap , key=itemgetter(1) ,reverse=True)
 			for row in doc.split('\n'):
-				print "row:" + row
 				for word in row.split():
 					for index in range(self.limit):
 						if word == sortkvmap[index][0]:
 							newdoc += word + " "
 				newdoc += '\n'
-				print doc
-				print "after"
-				print newdoc
+			
+			outputfilepath = self.target_path + "\\" + self.doc_labels[doc_index]
+			self.write_file(outputfilepath , newdoc)
+			
+			file = ""
+			for key,value in sortkvmap:
+				file += "%s:%f\n" % (key ,value)
+			self.write_file(outputfilepath+".kv" , file)
 
-	
-	def getDocs(self):
-		return self.docs
-
-def cmp(a ,b):
-	return a[1] < b[1]
 
 if __name__ == "__main__":
 	pf = parafactory()
